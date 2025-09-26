@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management Report</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-graduation-cap"></i> Course Management Report</h1>
+            <p>Track user enrollments and course completion status</p>
+        </header>
+
+        <!-- Statistics Dashboard -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-enrolments">Loading...</h3>
+                        <p>Total Enrollments</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-users">Loading...</h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-courses">Loading...</h3>
+                        <p>Total Courses</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="completion-rate">Loading...</h3>
+                        <p>Completion Rate</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters Section -->
+        <section class="filters-section">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="user-search">
+                        <i class="fas fa-user"></i> Search User:
+                    </label>
+                    <input type="text" id="user-search" placeholder="Enter user name...">
+                </div>
+                <div class="filter-group">
+                    <label for="course-search">
+                        <i class="fas fa-search"></i> Search Course:
+                    </label>
+                    <input type="text" id="course-search" placeholder="Enter course name...">
+                </div>
+                <div class="filter-group">
+                    <label for="status-filter">
+                        <i class="fas fa-filter"></i> Status:
+                    </label>
+                    <select id="status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="not started">Not Started</option>
+                        <option value="in progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <button id="clear-filters" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading data...
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="error-message" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i> 
+            <span id="error-text"></span>
+        </div>
+
+        <!-- Data Table -->
+        <section class="table-section">
+            <div class="table-controls">
+                <div class="table-info">
+                    <span id="table-info">Showing 0 records</span>
+                </div>
+                <div class="table-actions">
+                    <label for="records-per-page">Records per page:</label>
+                    <select id="records-per-page">
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="enrolments-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Enrolled Date</th>
+                            <th>Completed Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <button id="prev-page" class="btn btn-secondary" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="page-info">Page 1 of 1</span>
+                <button id="next-page" class="btn btn-secondary" disabled>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
