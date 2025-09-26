@@ -20,19 +20,32 @@ class MySQLCourseReportAPI {
         // 清理查詢字符串，移除多餘的空白和換行
         $cleanQuery = preg_replace('/\s+/', ' ', trim($query));
         
-        // 使用 MySQL 命令行工具執行查詢，使用批處理模式輸出 TSV 格式
+        // 創建臨時SQL文件來避免命令行長度和特殊字符問題
+        $tempFile = sys_get_temp_dir() . '/query_' . uniqid() . '.sql';
+        file_put_contents($tempFile, $cleanQuery);
+        
+        // 使用文件執行查詢
         $command = sprintf(
-            'mysql -h %s -u %s %s -B -e "%s" 2>nul',
+            'mysql -h %s -u %s %s -B < "%s"',
             $this->host,
             $this->username,
             $this->database,
-            addslashes($cleanQuery)
+            $tempFile
         );
         
         $output = shell_exec($command);
         
-        if ($output === null || trim($output) === '') {
-            throw new Exception('MySQL 查詢執行失敗');
+        // 清理臨時文件
+        if (file_exists($tempFile)) {
+            unlink($tempFile);
+        }
+        
+        if ($output === null) {
+            throw new Exception('MySQL 查詢執行失敗: shell_exec 返回 null');
+        }
+        
+        if (trim($output) === '') {
+            throw new Exception('MySQL 查詢執行失敗: 無輸出');
         }
         
         return $this->parseTSVOutput($output);
