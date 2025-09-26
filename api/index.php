@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: *'); 
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -9,139 +9,135 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit(0);
 }
 
-class MockCourseReportAPI {
-    private $users;
-    private $courses;
-    private $enrolments;
+class MySQLCourseReportAPI {
+    private $host = 'localhost';
+    private $username = 'root';
+    private $password = '';
+    private $database = 'course_management';
     
-    public function __construct() {
-        // Mock data - in a real scenario this would come from database
-        $this->users = [
-            ['user_id' => 1, 'first_name' => 'John', 'surname' => 'Smith'],
-            ['user_id' => 2, 'first_name' => 'Jane', 'surname' => 'Doe'],
-            ['user_id' => 3, 'first_name' => 'Michael', 'surname' => 'Johnson'],
-            ['user_id' => 4, 'first_name' => 'Emily', 'surname' => 'Brown'],
-            ['user_id' => 5, 'first_name' => 'David', 'surname' => 'Wilson'],
-            ['user_id' => 6, 'first_name' => 'Sarah', 'surname' => 'Davis'],
-            ['user_id' => 7, 'first_name' => 'Chris', 'surname' => 'Miller'],
-            ['user_id' => 8, 'first_name' => 'Lisa', 'surname' => 'Garcia'],
-            ['user_id' => 9, 'first_name' => 'Robert', 'surname' => 'Martinez'],
-            ['user_id' => 10, 'first_name' => 'Amanda', 'surname' => 'Taylor']
-        ];
+    
+    private function executeQuery($query) {
+        // 清理查詢字符串，移除多餘的空白和換行
+        $cleanQuery = preg_replace('/\s+/', ' ', trim($query));
         
-        $this->courses = [
-            ['course_id' => 1, 'description' => 'Introduction to Web Development'],
-            ['course_id' => 2, 'description' => 'Advanced JavaScript Programming'],
-            ['course_id' => 3, 'description' => 'Database Design and Management'],
-            ['course_id' => 4, 'description' => 'PHP Backend Development'],
-            ['course_id' => 5, 'description' => 'React Frontend Framework'],
-            ['course_id' => 6, 'description' => 'Node.js Server Development'],
-            ['course_id' => 7, 'description' => 'Mobile App Development'],
-            ['course_id' => 8, 'description' => 'Data Science with Python']
-        ];
+        // 使用 MySQL 命令行工具執行查詢，使用批處理模式輸出 TSV 格式
+        $command = sprintf(
+            'mysql -h %s -u %s %s -B -e "%s" 2>nul',
+            $this->host,
+            $this->username,
+            $this->database,
+            addslashes($cleanQuery)
+        );
         
-        $this->enrolments = [
-            ['enrolment_id' => 1, 'user_id' => 1, 'course_id' => 1, 'completion_status' => 'completed', 'enrolled_at' => '2025-01-15 10:30:00', 'completed_at' => '2025-02-20 15:45:00'],
-            ['enrolment_id' => 2, 'user_id' => 1, 'course_id' => 2, 'completion_status' => 'in progress', 'enrolled_at' => '2025-02-01 09:15:00', 'completed_at' => null],
-            ['enrolment_id' => 3, 'user_id' => 1, 'course_id' => 3, 'completion_status' => 'not started', 'enrolled_at' => '2025-02-10 14:20:00', 'completed_at' => null],
-            ['enrolment_id' => 4, 'user_id' => 2, 'course_id' => 1, 'completion_status' => 'completed', 'enrolled_at' => '2025-01-20 11:00:00', 'completed_at' => '2025-03-01 16:30:00'],
-            ['enrolment_id' => 5, 'user_id' => 2, 'course_id' => 4, 'completion_status' => 'in progress', 'enrolled_at' => '2025-02-05 08:45:00', 'completed_at' => null],
-            ['enrolment_id' => 6, 'user_id' => 3, 'course_id' => 2, 'completion_status' => 'completed', 'enrolled_at' => '2025-01-25 13:10:00', 'completed_at' => '2025-02-28 12:15:00'],
-            ['enrolment_id' => 7, 'user_id' => 3, 'course_id' => 5, 'completion_status' => 'not started', 'enrolled_at' => '2025-02-15 10:30:00', 'completed_at' => null],
-            ['enrolment_id' => 8, 'user_id' => 4, 'course_id' => 3, 'completion_status' => 'in progress', 'enrolled_at' => '2025-01-30 15:20:00', 'completed_at' => null],
-            ['enrolment_id' => 9, 'user_id' => 4, 'course_id' => 6, 'completion_status' => 'completed', 'enrolled_at' => '2025-01-10 09:00:00', 'completed_at' => '2025-02-25 17:45:00'],
-            ['enrolment_id' => 10, 'user_id' => 5, 'course_id' => 7, 'completion_status' => 'not started', 'enrolled_at' => '2025-02-20 12:00:00', 'completed_at' => null],
-            ['enrolment_id' => 11, 'user_id' => 5, 'course_id' => 8, 'completion_status' => 'completed', 'enrolled_at' => '2025-01-05 14:30:00', 'completed_at' => '2025-02-15 11:20:00'],
-            ['enrolment_id' => 12, 'user_id' => 6, 'course_id' => 1, 'completion_status' => 'in progress', 'enrolled_at' => '2025-02-08 16:15:00', 'completed_at' => null],
-            ['enrolment_id' => 13, 'user_id' => 6, 'course_id' => 4, 'completion_status' => 'completed', 'enrolled_at' => '2025-01-12 10:45:00', 'completed_at' => '2025-02-22 14:30:00'],
-            ['enrolment_id' => 14, 'user_id' => 7, 'course_id' => 2, 'completion_status' => 'not started', 'enrolled_at' => '2025-02-12 13:30:00', 'completed_at' => null],
-            ['enrolment_id' => 15, 'user_id' => 7, 'course_id' => 5, 'completion_status' => 'in progress', 'enrolled_at' => '2025-01-28 11:15:00', 'completed_at' => null],
-            ['enrolment_id' => 16, 'user_id' => 8, 'course_id' => 3, 'completion_status' => 'completed', 'enrolled_at' => '2025-01-18 09:30:00', 'completed_at' => '2025-02-18 15:00:00'],
-            ['enrolment_id' => 17, 'user_id' => 8, 'course_id' => 6, 'completion_status' => 'not started', 'enrolled_at' => '2025-02-18 14:45:00', 'completed_at' => null],
-            ['enrolment_id' => 18, 'user_id' => 9, 'course_id' => 7, 'completion_status' => 'completed', 'enrolled_at' => '2025-01-22 12:20:00', 'completed_at' => '2025-02-12 16:45:00'],
-            ['enrolment_id' => 19, 'user_id' => 9, 'course_id' => 8, 'completion_status' => 'in progress', 'enrolled_at' => '2025-02-02 10:10:00', 'completed_at' => null],
-            ['enrolment_id' => 20, 'user_id' => 10, 'course_id' => 1, 'completion_status' => 'not started', 'enrolled_at' => '2025-02-22 15:30:00', 'completed_at' => null]
-        ];
+        $output = shell_exec($command);
+        
+        if ($output === null || trim($output) === '') {
+            throw new Exception('MySQL 查詢執行失敗');
+        }
+        
+        return $this->parseTSVOutput($output);
     }
     
-    private function getUserById($userId) {
-        foreach ($this->users as $user) {
-            if ($user['user_id'] == $userId) {
-                return $user;
-            }
+    private function parseTSVOutput($output) {
+        $lines = explode("\n", trim($output));
+        if (count($lines) < 1) {
+            return [];
         }
-        return null;
-    }
-    
-    private function getCourseById($courseId) {
-        foreach ($this->courses as $course) {
-            if ($course['course_id'] == $courseId) {
-                return $course;
+        
+        // 第一行是標題
+        $headers = explode("\t", $lines[0]);
+        $results = [];
+        
+        // 從第二行開始是數據
+        for ($i = 1; $i < count($lines); $i++) {
+            if (trim($lines[$i]) === '') continue;
+            
+            $values = explode("\t", $lines[$i]);
+            $row = [];
+            
+            for ($j = 0; $j < count($headers); $j++) {
+                $value = isset($values[$j]) ? $values[$j] : null;
+                // 處理 NULL 值
+                if ($value === 'NULL') {
+                    $value = null;
+                }
+                $row[$headers[$j]] = $value;
             }
+            
+            $results[] = $row;
         }
-        return null;
+        
+        return $results;
     }
     
     public function getEnrolmentData($page = 1, $limit = 50, $filters = []) {
         try {
-            $filteredEnrolments = $this->enrolments;
+            $offset = ($page - 1) * $limit;
             
-            // Apply filters
+            // 構建查詢
+            $query = "
+                SELECT 
+                    e.enrolment_id,
+                    u.user_id,
+                    u.first_name,
+                    u.surname,
+                    c.course_id,
+                    c.description as course_description,
+                    e.completion_status,
+                    e.enrolled_at,
+                    e.completed_at
+                FROM enrolments e
+                JOIN users u ON e.user_id = u.user_id
+                JOIN courses c ON e.course_id = c.course_id
+                WHERE 1=1
+            ";
+            
+            // 應用過濾器
             if (!empty($filters['user_name'])) {
-                $filteredEnrolments = array_filter($filteredEnrolments, function($enrolment) use ($filters) {
-                    $user = $this->getUserById($enrolment['user_id']);
-                    if ($user) {
-                        $fullName = strtolower($user['first_name'] . ' ' . $user['surname']);
-                        return strpos($fullName, strtolower($filters['user_name'])) !== false;
-                    }
-                    return false;
-                });
+                $searchTerm = addslashes($filters['user_name']);
+                $query .= " AND (u.first_name LIKE '%{$searchTerm}%' OR u.surname LIKE '%{$searchTerm}%')";
             }
             
             if (!empty($filters['course_name'])) {
-                $filteredEnrolments = array_filter($filteredEnrolments, function($enrolment) use ($filters) {
-                    $course = $this->getCourseById($enrolment['course_id']);
-                    if ($course) {
-                        return strpos(strtolower($course['description']), strtolower($filters['course_name'])) !== false;
-                    }
-                    return false;
-                });
+                $searchTerm = addslashes($filters['course_name']);
+                $query .= " AND c.description LIKE '%{$searchTerm}%'";
             }
             
             if (!empty($filters['status'])) {
-                $filteredEnrolments = array_filter($filteredEnrolments, function($enrolment) use ($filters) {
-                    return $enrolment['completion_status'] === $filters['status'];
-                });
+                $status = addslashes($filters['status']);
+                $query .= " AND e.completion_status = '{$status}'";
             }
             
-            $totalRecords = count($filteredEnrolments);
+            // 獲取總記錄數 - 先構建計數查詢
+            $countQuery = "SELECT COUNT(*) as total FROM enrolments e JOIN users u ON e.user_id = u.user_id JOIN courses c ON e.course_id = c.course_id WHERE 1=1";
             
-            // Apply pagination
-            $offset = ($page - 1) * $limit;
-            $pagedEnrolments = array_slice($filteredEnrolments, $offset, $limit);
-            
-            // Enrich data with user and course information
-            $enrichedData = [];
-            foreach ($pagedEnrolments as $enrolment) {
-                $user = $this->getUserById($enrolment['user_id']);
-                $course = $this->getCourseById($enrolment['course_id']);
-                
-                $enrichedData[] = [
-                    'enrolment_id' => $enrolment['enrolment_id'],
-                    'user_id' => $enrolment['user_id'],
-                    'first_name' => $user['first_name'],
-                    'surname' => $user['surname'],
-                    'course_id' => $enrolment['course_id'],
-                    'course_description' => $course['description'],
-                    'completion_status' => $enrolment['completion_status'],
-                    'enrolled_at' => $enrolment['enrolled_at'],
-                    'completed_at' => $enrolment['completed_at']
-                ];
+            // 添加同樣的過濾條件
+            if (!empty($filters['user_name'])) {
+                $searchTerm = addslashes($filters['user_name']);
+                $countQuery .= " AND (u.first_name LIKE '%{$searchTerm}%' OR u.surname LIKE '%{$searchTerm}%')";
             }
+            
+            if (!empty($filters['course_name'])) {
+                $searchTerm = addslashes($filters['course_name']);
+                $countQuery .= " AND c.description LIKE '%{$searchTerm}%'";
+            }
+            
+            if (!empty($filters['status'])) {
+                $status = addslashes($filters['status']);
+                $countQuery .= " AND e.completion_status = '{$status}'";
+            }
+            
+            $countResult = $this->executeQuery($countQuery);
+            $totalRecords = isset($countResult[0]['total']) ? intval($countResult[0]['total']) : 0;
+            
+            // 添加分頁
+            $query .= " ORDER BY e.enrolled_at DESC LIMIT {$limit} OFFSET {$offset}";
+            
+            $records = $this->executeQuery($query);
             
             return [
                 'success' => true,
-                'data' => $enrichedData,
+                'data' => $records,
                 'pagination' => [
                     'current_page' => $page,
                     'total_records' => $totalRecords,
@@ -160,24 +156,40 @@ class MockCourseReportAPI {
     
     public function getStatistics() {
         try {
-            $totalEnrolments = count($this->enrolments);
+            // 總註冊數
+            $totalEnrolmentsResult = $this->executeQuery("SELECT COUNT(*) as total FROM enrolments");
+            $totalEnrolments = intval($totalEnrolmentsResult[0]['total']);
             
-            // Status breakdown
+            // 狀態分佈
+            $statusResult = $this->executeQuery("
+                SELECT completion_status, COUNT(*) as count 
+                FROM enrolments 
+                GROUP BY completion_status
+            ");
+            
             $statusBreakdown = [];
-            foreach ($this->enrolments as $enrolment) {
-                $status = $enrolment['completion_status'];
-                $statusBreakdown[$status] = ($statusBreakdown[$status] ?? 0) + 1;
+            foreach ($statusResult as $row) {
+                $statusBreakdown[$row['completion_status']] = intval($row['count']);
             }
             
-            $completedCount = $statusBreakdown['completed'] ?? 0;
+            // 總用戶數
+            $totalUsersResult = $this->executeQuery("SELECT COUNT(*) as total FROM users");
+            $totalUsers = intval($totalUsersResult[0]['total']);
+            
+            // 總課程數
+            $totalCoursesResult = $this->executeQuery("SELECT COUNT(*) as total FROM courses");
+            $totalCourses = intval($totalCoursesResult[0]['total']);
+            
+            // 完成率
+            $completedCount = isset($statusBreakdown['completed']) ? $statusBreakdown['completed'] : 0;
             $completionRate = $totalEnrolments > 0 ? round(($completedCount / $totalEnrolments) * 100, 2) : 0;
             
             return [
                 'success' => true,
                 'data' => [
                     'total_enrolments' => $totalEnrolments,
-                    'total_users' => count($this->users),
-                    'total_courses' => count($this->courses),
+                    'total_users' => $totalUsers,
+                    'total_courses' => $totalCourses,
                     'completion_rate' => $completionRate,
                     'status_breakdown' => $statusBreakdown
                 ]
@@ -192,22 +204,50 @@ class MockCourseReportAPI {
     }
     
     public function getUsers() {
-        return [
-            'success' => true,
-            'data' => $this->users
-        ];
+        try {
+            $users = $this->executeQuery("
+                SELECT user_id, first_name, surname 
+                FROM users 
+                ORDER BY first_name, surname
+            ");
+            
+            return [
+                'success' => true,
+                'data' => $users
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
     }
     
     public function getCourses() {
-        return [
-            'success' => true,
-            'data' => $this->courses
-        ];
+        try {
+            $courses = $this->executeQuery("
+                SELECT course_id, description 
+                FROM courses 
+                ORDER BY description
+            ");
+            
+            return [
+                'success' => true,
+                'data' => $courses
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
     }
 }
 
 // Handle the API request
-$api = new MockCourseReportAPI();
+$api = new MySQLCourseReportAPI();
 
 $action = $_GET['action'] ?? 'enrolments';
 $page = intval($_GET['page'] ?? 1);
